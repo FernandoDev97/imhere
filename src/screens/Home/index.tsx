@@ -1,7 +1,8 @@
-import { Text, TextInput, ScrollView, View, FlatList, Alert } from "react-native";
+import { Text, TextInput, ScrollView, View, FlatList, Alert, TextInputChangeEventData } from "react-native";
 import { styles } from "./styles";
 import { Participant } from "../../components/Participant";
 import { Button } from "../../components/Button";
+import { ChangeEvent, useState } from "react";
 
 const participants = [
   "Fernando",
@@ -21,11 +22,32 @@ const participants = [
   "Adriely3",
 ];
 
+interface UserProps {
+  name: string
+}
+
 export function Home() {
-  const handleParticipantAdd = () => {
-    if(participants.includes('Fernando')) {
+
+
+  const [participants, setParticipants] = useState<UserProps[]>([])
+  const [nameParticipant, setNameParticipant] = useState('')  
+
+  const handleParticipantAdd = (name: string) => {
+    if (!name) {
+      return
+    }
+    if(participants.some(participant => participant.name === name)) {
+      setNameParticipant('')
       return Alert.alert("Participante novo", "Ja existe um participante com esse nome na lista")
     }
+    setParticipants(state =>[
+      ...state,
+      {
+        name: name
+      }
+    ])
+
+    setNameParticipant('')
   };
 
   const handleParticipantRemove = (name: string) => {
@@ -53,8 +75,10 @@ export function Home() {
           placeholder="Nome do participante"
           placeholderTextColor="#6b6b6b"
           keyboardType="default"
+          onChangeText={e => setNameParticipant(e)}
+          value={nameParticipant}
         />
-        <Button variant="add" clickButton={handleParticipantAdd}>
+        <Button variant="add" clickButton={() => handleParticipantAdd(nameParticipant)}>
           +
         </Button>
       </View>
@@ -67,12 +91,12 @@ export function Home() {
         )}
         showsVerticalScrollIndicator={false}
         data={participants}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
           <Participant
-            key={item}
-            onRemove={() => handleParticipantRemove(item)}
-            name={item}
+            key={item.name}
+            onRemove={() => handleParticipantRemove(item.name)}
+            name={item.name}
           />
         )}
       />
